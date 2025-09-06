@@ -1,0 +1,35 @@
+/**
+ * Admin styles for External Links Redirects plugin.
+ *
+ * @package External_Links_Redirects
+ */
+
+.external-links-redirects-admin {
+    max-width: 800px;
+}
+
+.external-links-redirects-admin .form-table th {
+    width: 200px;
+}
+
+.external-links-redirects-admin .form-table td {
+    padding: 15px 10px;
+}
+
+.external-links-redirects-admin .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.external-links-redirects-admin input[type="number"] {
+    width: 80px;
+}
+
+.external-links-redirects-admin .notice {
+    margin: 15px 0;
+}
+
+.external-links-redirects-admin .button-primary {
+    margin-top: 20px;
+}
