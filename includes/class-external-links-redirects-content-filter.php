@@ -157,7 +157,8 @@ class External_Links_Redirects_Content_Filter {
 	public function handle_leaving_page() {
 		if ( get_query_var( 'leaving_page' ) ) {
 			// Check if we have a URL parameter.
-			$encoded_url = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
+			$encoded_url = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRING );
+			$encoded_url = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 
 			if ( empty( $encoded_url ) ) {
 				wp_die( esc_html__( 'No URL provided.', 'external-links-redirects' ) );
@@ -169,7 +170,6 @@ class External_Links_Redirects_Content_Filter {
 				wp_die( esc_html__( 'Invalid URL provided.', 'external-links-redirects' ) );
 			}
 
-			// Load the page template.
 			$this->load_page_template();
 			exit;
 		}
@@ -179,13 +179,12 @@ class External_Links_Redirects_Content_Filter {
 	 * Handle direct access to the leaving page.
 	 */
 	public function handle_direct_leaving_page_access() {
-		// Check if we're on the leaving page directly.
 		if ( is_page( 'leaving' ) ) {
 			// Check if we have a URL parameter.
-			$encoded_url = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
+			$encoded_url = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRING );
+			$encoded_url = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 
 			if ( empty( $encoded_url ) ) {
-				// Redirect to home page if no URL parameter.
 				wp_redirect( home_url() );
 				exit;
 			}
@@ -195,8 +194,6 @@ class External_Links_Redirects_Content_Filter {
 			if ( ! filter_var( $external_url, FILTER_VALIDATE_URL ) ) {
 				wp_die( esc_html__( 'Invalid URL provided.', 'external-links-redirects' ) );
 			}
-
-			// The page template will handle the display.
 		}
 	}
 
@@ -204,21 +201,17 @@ class External_Links_Redirects_Content_Filter {
 	 * Load the page template for the leaving page.
 	 */
 	private function load_page_template() {
-		// Set up global query for the leaving page.
 		global $wp_query, $post;
 
-		// Get the leaving page.
 		$leaving_page = get_page_by_path( 'leaving' );
 
 		if ( ! $leaving_page ) {
 			wp_die( esc_html__( 'Leaving page not found.', 'external-links-redirects' ) );
 		}
 
-		// Set up the post data.
 		$post = $leaving_page;
 		setup_postdata( $post );
 
-		// Set up the query.
 		$wp_query->is_page              = true;
 		$wp_query->is_singular          = true;
 		$wp_query->is_home              = false;
@@ -246,13 +239,11 @@ class External_Links_Redirects_Content_Filter {
 		$wp_query->is_posts_page        = false;
 		$wp_query->is_post_type_archive = false;
 
-		// Load the template.
 		$template_path = EXTERNAL_LINKS_REDIRECTS_PLUGIN_DIR . 'templates/page-leaving.php';
 
 		if ( file_exists( $template_path ) ) {
 			include $template_path;
 		} else {
-			// Fallback to the original template method.
 			$this->display_leaving_page();
 		}
 	}
@@ -261,7 +252,8 @@ class External_Links_Redirects_Content_Filter {
 	 * Display the leaving page (fallback method).
 	 */
 	private function display_leaving_page() {
-		$encoded_url  = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
+		$encoded_url  = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRING );
+		$encoded_url  = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 		$external_url = urldecode( $encoded_url );
 
 		if ( empty( $external_url ) || ! filter_var( $external_url, FILTER_VALIDATE_URL ) ) {
@@ -271,10 +263,9 @@ class External_Links_Redirects_Content_Filter {
 		$parsed_url      = wp_parse_url( $external_url );
 		$external_domain = isset( $parsed_url['host'] ) ? $parsed_url['host'] : $external_url;
 
-		$options        = get_option( 'external_links_redirects_options', array() );
-		$redirect_delay = isset( $options['redirect_delay'] ) ? absint( $options['redirect_delay'] ) : 0;
+		$options = get_option( 'external_links_redirects_options', array() );
 
-		$this->load_leaving_template( $external_url, $external_domain, $redirect_delay );
+		$this->load_leaving_template( $external_url, $external_domain, );
 	}
 
 	/**
@@ -282,9 +273,8 @@ class External_Links_Redirects_Content_Filter {
 	 *
 	 * @param string $external_url The external URL.
 	 * @param string $external_domain The external domain.
-	 * @param int    $redirect_delay The redirect delay in seconds.
 	 */
-	private function load_leaving_template( $external_url, $external_domain, $redirect_delay ) {
+	private function load_leaving_template( $external_url, $external_domain ) {
 		?>
 		<!DOCTYPE html>
 		<html <?php language_attributes(); ?>>
@@ -391,18 +381,6 @@ class External_Links_Redirects_Content_Filter {
 					<p><?php esc_html_e( 'This is an external website. We are not responsible for the content, privacy policies, or practices of external sites.', 'external-links-redirects' ); ?></p>
 				</div>
 
-				<?php if ( $redirect_delay > 0 ) : ?>
-					<div class="countdown" id="countdown">
-						<?php
-						printf(
-							/* translators: %d: number of seconds */
-							esc_html__( 'Redirecting automatically in %d seconds...', 'external-links-redirects' ),
-							$redirect_delay
-						);
-						?>
-					</div>
-				<?php endif; ?>
-
 				<div>
 					<a href="<?php echo esc_url( $external_url ); ?>" class="continue-button" id="continue-btn">
 						<?php esc_html_e( 'Continue to External Site', 'external-links-redirects' ); ?>
@@ -416,28 +394,6 @@ class External_Links_Redirects_Content_Filter {
 					<p><?php bloginfo( 'name' ); ?> - <?php esc_html_e( 'External Link Redirect', 'external-links-redirects' ); ?></p>
 				</div>
 			</div>
-
-			<?php if ( $redirect_delay > 0 ) : ?>
-				<script>
-				(function() {
-					var countdown = <?php echo esc_js( $redirect_delay ); ?>;
-					var countdownElement = document.getElementById('countdown');
-					var continueBtn = document.getElementById('continue-btn');
-					
-					function updateCountdown() {
-						if (countdown > 0) {
-							countdownElement.textContent = '<?php esc_js_e( 'Redirecting automatically in', 'external-links-redirects' ); ?> ' + countdown + ' <?php esc_js_e( 'seconds...', 'external-links-redirects' ); ?>';
-							countdown--;
-							setTimeout(updateCountdown, 1000);
-						} else {
-							window.location.href = continueBtn.href;
-						}
-					}
-					
-					updateCountdown();
-				})();
-				</script>
-			<?php endif; ?>
 
 			<?php wp_footer(); ?>
 		</body>

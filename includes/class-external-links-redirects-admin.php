@@ -48,8 +48,8 @@ class External_Links_Redirects_Admin {
 	 */
 	public function register_settings() {
 		register_setting(
-			'external_links_redirects_options',
-			'external_links_redirects_options',
+			'external_links_redirects_options_enable_redirects',
+			'external_links_redirects_options_enable_redirects',
 			array( $this, 'sanitize_options' )
 		);
 
@@ -61,17 +61,9 @@ class External_Links_Redirects_Admin {
 		);
 
 		add_settings_field(
-			'enable_redirects',
+			'external_links_redirects_options_enable_redirects',
 			__( 'Enable Redirects', 'external-links-redirects' ),
 			array( $this, 'enable_redirects_callback' ),
-			'external-links-redirects',
-			'external_links_redirects_general'
-		);
-
-		add_settings_field(
-			'redirect_delay',
-			__( 'Redirect Delay (seconds)', 'external-links-redirects' ),
-			array( $this, 'redirect_delay_callback' ),
 			'external-links-redirects',
 			'external_links_redirects_general'
 		);
@@ -84,17 +76,7 @@ class External_Links_Redirects_Admin {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $input ) {
-		$sanitized = array();
-
-		if ( isset( $input['enable_redirects'] ) ) {
-			$sanitized['enable_redirects'] = (bool) $input['enable_redirects'];
-		}
-
-		if ( isset( $input['redirect_delay'] ) ) {
-			$sanitized['redirect_delay'] = absint( $input['redirect_delay'] );
-		}
-
-		return $sanitized;
+		return ( isset( $input ) && $input ) ? 1 : 0;
 	}
 
 	/**
@@ -108,22 +90,11 @@ class External_Links_Redirects_Admin {
 	 * Enable redirects callback.
 	 */
 	public function enable_redirects_callback() {
-		$options = get_option( 'external_links_redirects_options', array() );
-		$value   = isset( $options['enable_redirects'] ) ? $options['enable_redirects'] : true;
+		$options = get_option( 'external_links_redirects_options_enable_redirects' );
+		$value   = isset( $options ) ? $options : true;
 
-		echo '<input type="checkbox" id="enable_redirects" name="external_links_redirects_options[enable_redirects]" value="1" ' . checked( 1, $value, false ) . ' />';
+		echo '<input type="checkbox" id="enable_redirects" name="external_links_redirects_options_enable_redirects" value="1" ' . checked( 1, $value, false ) . ' />';
 		echo '<label for="enable_redirects">' . esc_html__( 'Enable external link redirects', 'external-links-redirects' ) . '</label>';
-	}
-
-	/**
-	 * Redirect delay callback.
-	 */
-	public function redirect_delay_callback() {
-		$options = get_option( 'external_links_redirects_options', array() );
-		$value   = isset( $options['redirect_delay'] ) ? $options['redirect_delay'] : 0;
-
-		echo '<input type="number" id="redirect_delay" name="external_links_redirects_options[redirect_delay]" value="' . esc_attr( $value ) . '" min="0" max="10" />';
-		echo '<p class="description">' . esc_html__( 'Delay in seconds before redirecting to external links (0-10 seconds).', 'external-links-redirects' ) . '</p>';
 	}
 
 	/**
@@ -153,7 +124,7 @@ class External_Links_Redirects_Admin {
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<form method="post" action="options.php">
 				<?php
-				settings_fields( 'external_links_redirects_options' );
+				settings_fields( 'external_links_redirects_options_enable_redirects' );
 				do_settings_sections( 'external-links-redirects' );
 				submit_button();
 				?>

@@ -9,7 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$encoded_url  = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
+$encoded_url  = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRING );
+$encoded_url  = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 $external_url = urldecode( $encoded_url );
 
 if ( empty( $external_url ) || ! filter_var( $external_url, FILTER_VALIDATE_URL ) ) {
@@ -19,8 +20,7 @@ if ( empty( $external_url ) || ! filter_var( $external_url, FILTER_VALIDATE_URL 
 $parsed_url      = wp_parse_url( $external_url );
 $external_domain = isset( $parsed_url['host'] ) ? $parsed_url['host'] : $external_url;
 
-$options        = get_option( 'external_links_redirects_options', array() );
-$redirect_delay = isset( $options['redirect_delay'] ) ? absint( $options['redirect_delay'] ) : 0;
+$options = get_option( 'external_links_redirects_options_enable_redirects', array() );
 
 get_header();
 ?>
@@ -114,18 +114,6 @@ get_header();
 		<p><?php esc_html_e( 'This is an external website. We are not responsible for the content, privacy policies, or practices of external sites.', 'external-links-redirects' ); ?></p>
 	</div>
 
-	<?php if ( $redirect_delay > 0 ) : ?>
-		<div class="countdown" id="countdown">
-			<?php
-			printf(
-				/* translators: %d: number of seconds */
-				esc_html__( 'Redirecting automatically in %d seconds...', 'external-links-redirects' ),
-				$redirect_delay
-			);
-			?>
-		</div>
-	<?php endif; ?>
-
 	<div>
 		<a href="<?php echo esc_url( $external_url ); ?>" class="continue-button" id="continue-btn">
 			<?php esc_html_e( 'Continue to External Site', 'external-links-redirects' ); ?>
@@ -139,28 +127,6 @@ get_header();
 		<p><?php bloginfo( 'name' ); ?> - <?php esc_html_e( 'External Link Redirect', 'external-links-redirects' ); ?></p>
 	</div>
 </div>
-
-<?php if ( $redirect_delay > 0 ) : ?>
-<script>
-(function() {
-	var countdown = <?php echo esc_js( $redirect_delay ); ?>;
-	var countdownElement = document.getElementById('countdown');
-	var continueBtn = document.getElementById('continue-btn');
-	
-	function updateCountdown() {
-		if (countdown > 0) {
-			countdownElement.textContent = '<?php esc_js_e( 'Redirecting automatically in', 'external-links-redirects' ); ?> ' + countdown + ' <?php esc_js_e( 'seconds...', 'external-links-redirects' ); ?>';
-			countdown--;
-			setTimeout(updateCountdown, 1000);
-		} else {
-			window.location.href = continueBtn.href;
-		}
-	}
-	
-	updateCountdown();
-})();
-</script>
-<?php endif; ?>
 
 <?php
 get_footer();
