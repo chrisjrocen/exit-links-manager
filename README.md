@@ -8,11 +8,7 @@ External Links Redirects is a WordPress plugin that provides functionality to ma
 
 ## Features
 
-- **External Link Detection**: Automatically detects external links on your website
-- **Redirect Management**: Configurable redirect delays and options
-- **Frontend JavaScript**: Enhanced user experience with JavaScript functionality
-- **Tracking**: Optional tracking of external link clicks
-- **WordPress Standards**: Follows WordPress coding standards and best practices
+- **External Link Detection**: Automatically detects and warns users about external links on your website
 
 ## Installation
 

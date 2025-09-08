@@ -117,9 +117,47 @@ class External_Links_Redirects {
 
 		add_option( 'external_links_redirects_options', $default_options );
 
+		$this->create_leaving_page();
+
 		add_rewrite_rule( '^leaving/?$', 'index.php?leaving_page=1', 'top' );
 
 		flush_rewrite_rules();
+	}
+
+	/**
+	 * Create leaving page if it doesn't exist.
+	 */
+	private function create_leaving_page() {
+		// Check if page with slug 'leaving' already exists.
+		$existing_page = get_page_by_path( 'leaving' );
+
+		if ( $existing_page ) {
+			return $existing_page->ID;
+		}
+
+		// Create the leaving page.
+		$page_content = '<!-- This page is automatically managed by External Links Redirects plugin -->';
+		$page_data    = array(
+			'post_title'   => __( 'Leaving Site', 'external-links-redirects' ),
+			'post_content' => $page_content,
+			'post_status'  => 'publish',
+			'post_type'    => 'page',
+			'post_name'    => 'leaving',
+			'post_author'  => 1,
+		);
+
+		$page_id = wp_insert_post( $page_data );
+
+		if ( is_wp_error( $page_id ) ) {
+			error_log( 'External Links Redirects: Failed to create leaving page - ' . $page_id->get_error_message() );
+			return false;
+		}
+
+		$options                    = get_option( 'external_links_redirects_options', array() );
+		$options['leaving_page_id'] = $page_id;
+		update_option( 'external_links_redirects_options', $options );
+
+		return $page_id;
 	}
 
 	/**

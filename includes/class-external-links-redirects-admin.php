@@ -5,7 +5,6 @@
  * @package External_Links_Redirects
  */
 
-// Prevent direct access.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

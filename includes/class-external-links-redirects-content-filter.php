@@ -31,6 +31,7 @@ class External_Links_Redirects_Content_Filter {
 		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_leaving_page' ) );
+		add_action( 'template_redirect', array( $this, 'handle_direct_leaving_page_access' ) );
 	}
 
 	/**
@@ -155,13 +156,109 @@ class External_Links_Redirects_Content_Filter {
 	 */
 	public function handle_leaving_page() {
 		if ( get_query_var( 'leaving_page' ) ) {
-			$this->display_leaving_page();
+			// Check if we have a URL parameter.
+			$encoded_url = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
+
+			if ( empty( $encoded_url ) ) {
+				wp_die( esc_html__( 'No URL provided.', 'external-links-redirects' ) );
+			}
+
+			// Validate the URL.
+			$external_url = urldecode( $encoded_url );
+			if ( ! filter_var( $external_url, FILTER_VALIDATE_URL ) ) {
+				wp_die( esc_html__( 'Invalid URL provided.', 'external-links-redirects' ) );
+			}
+
+			// Load the page template.
+			$this->load_page_template();
 			exit;
 		}
 	}
 
 	/**
-	 * Display the leaving page.
+	 * Handle direct access to the leaving page.
+	 */
+	public function handle_direct_leaving_page_access() {
+		// Check if we're on the leaving page directly.
+		if ( is_page( 'leaving' ) ) {
+			// Check if we have a URL parameter.
+			$encoded_url = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
+
+			if ( empty( $encoded_url ) ) {
+				// Redirect to home page if no URL parameter.
+				wp_redirect( home_url() );
+				exit;
+			}
+
+			// Validate the URL.
+			$external_url = urldecode( $encoded_url );
+			if ( ! filter_var( $external_url, FILTER_VALIDATE_URL ) ) {
+				wp_die( esc_html__( 'Invalid URL provided.', 'external-links-redirects' ) );
+			}
+
+			// The page template will handle the display.
+		}
+	}
+
+	/**
+	 * Load the page template for the leaving page.
+	 */
+	private function load_page_template() {
+		// Set up global query for the leaving page.
+		global $wp_query, $post;
+
+		// Get the leaving page.
+		$leaving_page = get_page_by_path( 'leaving' );
+
+		if ( ! $leaving_page ) {
+			wp_die( esc_html__( 'Leaving page not found.', 'external-links-redirects' ) );
+		}
+
+		// Set up the post data.
+		$post = $leaving_page;
+		setup_postdata( $post );
+
+		// Set up the query.
+		$wp_query->is_page              = true;
+		$wp_query->is_singular          = true;
+		$wp_query->is_home              = false;
+		$wp_query->is_archive           = false;
+		$wp_query->is_category          = false;
+		$wp_query->is_tag               = false;
+		$wp_query->is_tax               = false;
+		$wp_query->is_author            = false;
+		$wp_query->is_date              = false;
+		$wp_query->is_year              = false;
+		$wp_query->is_month             = false;
+		$wp_query->is_day               = false;
+		$wp_query->is_time              = false;
+		$wp_query->is_search            = false;
+		$wp_query->is_feed              = false;
+		$wp_query->is_comment_feed      = false;
+		$wp_query->is_trackback         = false;
+		$wp_query->is_404               = false;
+		$wp_query->is_paged             = false;
+		$wp_query->is_admin             = false;
+		$wp_query->is_attachment        = false;
+		$wp_query->is_single            = false;
+		$wp_query->is_preview           = false;
+		$wp_query->is_robots            = false;
+		$wp_query->is_posts_page        = false;
+		$wp_query->is_post_type_archive = false;
+
+		// Load the template.
+		$template_path = EXTERNAL_LINKS_REDIRECTS_PLUGIN_DIR . 'templates/page-leaving.php';
+
+		if ( file_exists( $template_path ) ) {
+			include $template_path;
+		} else {
+			// Fallback to the original template method.
+			$this->display_leaving_page();
+		}
+	}
+
+	/**
+	 * Display the leaving page (fallback method).
 	 */
 	private function display_leaving_page() {
 		$encoded_url  = isset( $_GET['url'] ) ? sanitize_text_field( wp_unslash( $_GET['url'] ) ) : '';
