@@ -1,8 +1,8 @@
 <?php
 /**
- * Content filter functionality for External Links Redirects plugin.
+ * Content filter functionality for Exit Links Manager plugin.
  *
- * @package External_Links_Redirects
+ * @package Exit_Links_Manager
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Content filter class for External Links Redirects.
+ * Content filter class for Exit Links Manager.
  */
-class External_Links_Redirects_Content_Filter {
+class Exit_Links_Manager_Content_Filter {
 
 	/**
 	 * Constructor.
@@ -39,10 +39,10 @@ class External_Links_Redirects_Content_Filter {
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style(
-			'external-links-redirects-styles',
-			EXTERNAL_LINKS_REDIRECTS_PLUGIN_URL . 'assets/css/frontend.css',
+			'exit-links-manager-styles',
+			EXIT_LINKS_MANAGER_PLUGIN_URL . 'assets/css/frontend.css',
 			array(),
-			EXTERNAL_LINKS_REDIRECTS_VERSION
+			EXIT_LINKS_MANAGER_VERSION
 		);
 	}
 
@@ -173,12 +173,12 @@ class External_Links_Redirects_Content_Filter {
 			$encoded_url = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 
 			if ( empty( $encoded_url ) ) {
-				wp_die( esc_html__( 'No URL provided.', 'external-links-redirects' ) );
+				wp_die( esc_html__( 'No URL provided.', 'exit-links-manager' ) );
 			}
 
 			$external_url = urldecode( $encoded_url );
 			if ( ! filter_var( $external_url, FILTER_VALIDATE_URL ) ) {
-				wp_die( esc_html__( 'Invalid URL provided.', 'external-links-redirects' ) );
+				wp_die( esc_html__( 'Invalid URL provided.', 'exit-links-manager' ) );
 			}
 
 			$this->load_page_template();
@@ -195,13 +195,13 @@ class External_Links_Redirects_Content_Filter {
 		$leaving_page = get_page_by_path( 'leaving' );
 
 		if ( ! $leaving_page ) {
-			wp_die( esc_html__( 'Leaving page not found.', 'external-links-redirects' ) );
+			wp_die( esc_html__( 'Leaving page not found.', 'exit-links-manager' ) );
 		}
 
 		$post = $leaving_page;
 		setup_postdata( $post );
 
-		$template_path = EXTERNAL_LINKS_REDIRECTS_PLUGIN_DIR . 'templates/go-page.php';
+		$template_path = EXIT_LINKS_MANAGER_PLUGIN_DIR . 'templates/go-page.php';
 
 		if ( file_exists( $template_path ) ) {
 			include $template_path;
