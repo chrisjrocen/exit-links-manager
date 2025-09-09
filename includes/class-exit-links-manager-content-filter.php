@@ -32,6 +32,7 @@ class Exit_Links_Manager_Content_Filter {
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_leaving_page' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
+		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 1 );
 	}
 
 	/**
@@ -59,41 +60,32 @@ class Exit_Links_Manager_Content_Filter {
 
 		$current_domain = $this->get_current_domain();
 
-		// Pattern to match external links.
-		$pattern = '/<a\s+([^>]*?)href=["\']([^"\']*?)["\']([^>]*?)>(.*?)<\/a>/i';
+		libxml_use_internal_errors( true );
+		$doc      = new DOMDocument();
+		$encoding = '<?xml encoding="utf-8" ?>';
+		$doc->loadHTML( $encoding . $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 
-		$content = preg_replace_callback(
-			$pattern,
-			function ( $matches ) use ( $current_domain ) {
-				$full_match  = $matches[0];
-				$before_href = $matches[1];
-				$url         = $matches[2];
-				$after_href  = $matches[3];
-				$link_text   = $matches[4];
+		$links = $doc->getElementsByTagName( 'a' );
 
-				if ( ! $this->is_external_url( $url, $current_domain ) ) {
-					return $full_match;
-				}
+		foreach ( $links as $link ) {
+			$href = $link->getAttribute( 'href' );
+			if ( ! $this->is_external_url( $href, $current_domain ) ) {
+				continue;
+			}
+			if ( false !== strpos( $href, '/leaving?url=' ) ) {
+				continue;
+			}
+			if ( ! $this->is_http_url( $href ) ) {
+				continue;
+			}
+			$encoded_url  = urlencode( $href );
+			$redirect_url = home_url( '/leaving?url=' . $encoded_url );
+			$link->setAttribute( 'href', esc_url( $redirect_url ) );
+		}
 
-				if ( false !== strpos( $url, '/leaving?url=' ) ) {
-					return $full_match;
-				}
-
-				// Skip if it's a mailto, tel, or other non-http link.
-				if ( ! $this->is_http_url( $url ) ) {
-					return $full_match;
-				}
-
-				$encoded_url = urlencode( $url );
-
-				$redirect_url = home_url( '/leaving?url=' . $encoded_url );
-
-				$new_link = '<a ' . $before_href . 'href="' . esc_url( $redirect_url ) . '"' . $after_href . '>' . $link_text . '</a>';
-
-				return $new_link;
-			},
-			$content
-		);
+		$html = $doc->saveHTML();
+		// Remove the XML encoding declaration.
+		$content = preg_replace( '/^<\?xml.+?\?>/', '', $html );
 
 		return $content;
 	}
@@ -120,7 +112,14 @@ class Exit_Links_Manager_Content_Filter {
 			return false;
 		}
 
-		return $parsed_url['host'] !== $current_domain;
+		$url_domain = $parsed_url['host'];
+
+		// Remove www. prefix for consistent comparison.
+		if ( 0 === strpos( $url_domain, 'www.' ) ) {
+			$url_domain = substr( $url_domain, 4 );
+		}
+
+		return $url_domain !== $current_domain;
 	}
 
 	/**
@@ -142,7 +141,24 @@ class Exit_Links_Manager_Content_Filter {
 	private function get_current_domain() {
 		$home_url    = home_url();
 		$parsed_home = wp_parse_url( $home_url );
-		return isset( $parsed_home['host'] ) ? $parsed_home['host'] : '';
+		$domain      = isset( $parsed_home['host'] ) ? $parsed_home['host'] : '';
+
+		// Remove www. prefix for consistent comparison.
+		if ( 0 === strpos( $domain, 'www.' ) ) {
+			$domain = substr( $domain, 4 );
+		}
+
+		return $domain;
+	}
+
+	/**
+	 * Maybe flush rewrite rules if needed.
+	 */
+	public function maybe_flush_rewrite_rules() {
+		if ( get_transient( 'exit_links_manager_flush_rewrite_rules' ) ) {
+			flush_rewrite_rules( true );
+			delete_transient( 'exit_links_manager_flush_rewrite_rules' );
+		}
 	}
 
 	/**
@@ -169,7 +185,7 @@ class Exit_Links_Manager_Content_Filter {
 	public function handle_leaving_page() {
 		if ( get_query_var( 'leaving_page' ) ) {
 			// Check if we have a URL parameter.
-			$encoded_url = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRING );
+			$encoded_url = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_URL );
 			$encoded_url = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 
 			if ( empty( $encoded_url ) ) {
@@ -203,8 +219,10 @@ class Exit_Links_Manager_Content_Filter {
 
 		$template_path = EXIT_LINKS_MANAGER_PLUGIN_DIR . 'templates/go-page.php';
 
-		if ( file_exists( $template_path ) ) {
+		if ( file_exists( $template_path ) && is_readable( $template_path ) ) {
 			include $template_path;
+		} else {
+			wp_die( esc_html__( 'Template file not found or not readable.', 'exit-links-manager' ) );
 		}
 	}
 }
