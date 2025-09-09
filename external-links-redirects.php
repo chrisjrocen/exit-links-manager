@@ -2,18 +2,16 @@
 /**
  * Plugin Name: External Links Redirects
  * Plugin URI: https://wp-fundi.com/external-links-redirects
- * Description: A WordPress plugin to handle external link redirects with frontend JavaScript functionality.
+ * Description: Plugins to handle external link redirects. Warn users when they are leaving your site.
  * Version: 1.0.0
  * Author: chris ocen
  * Author URI: https://ocenchris.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: external-links-redirects
- * Domain Path: /languages
- * Requires at least: 5.0
+ * Requires at least: 4.7
  * Tested up to: 6.4
  * Requires PHP: 7.4
- * Network: false
  *
  * @package External_Links_Redirects
  */
@@ -66,34 +64,7 @@ class External_Links_Redirects {
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
 
-		add_action( 'init', array( $this, 'init' ) );
-
-		if ( is_admin() ) {
-			$this->init_admin();
-		}
-
 		$this->init_content_filter();
-	}
-
-	/**
-	 * Initialize plugin.
-	 */
-	public function init() {
-		// Load text domain for translations.
-		load_plugin_textdomain(
-			'external-links-redirects',
-			false,
-			dirname( plugin_basename( __FILE__ ) ) . '/languages'
-		);
-	}
-
-	/**
-	 * Initialize admin functionality.
-	 */
-	private function init_admin() {
-		require_once EXTERNAL_LINKS_REDIRECTS_PLUGIN_DIR . 'includes/class-external-links-redirects-admin.php';
-
-		new External_Links_Redirects_Admin();
 	}
 
 	/**
@@ -109,13 +80,6 @@ class External_Links_Redirects {
 	 * Plugin activation.
 	 */
 	public function activate() {
-		$default_options = array(
-			'version'          => EXTERNAL_LINKS_REDIRECTS_VERSION,
-			'redirect_delay'   => 0,
-			'enable_redirects' => true,
-		);
-
-		add_option( 'external_links_redirects_options', $default_options );
 
 		$this->create_leaving_page();
 
@@ -149,13 +113,9 @@ class External_Links_Redirects {
 		$page_id = wp_insert_post( $page_data );
 
 		if ( is_wp_error( $page_id ) ) {
-			error_log( 'External Links Redirects: Failed to create leaving page - ' . $page_id->get_error_message() );
+			do_action( 'qm/debug', 'External Links Redirects: Failed to create leaving page - ' . $page_id->get_error_message() );
 			return false;
 		}
-
-		$options                    = get_option( 'external_links_redirects_options', array() );
-		$options['leaving_page_id'] = $page_id;
-		update_option( 'external_links_redirects_options', $options );
 
 		return $page_id;
 	}

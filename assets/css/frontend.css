@@ -1,0 +1,168 @@
+/**
+ * Frontend styles for External Links Redirects plugin.
+ *
+ * @package External_Links_Redirects
+ */
+
+
+.warning-icon {
+	font-size: 48px;
+	color: #ff6b35;
+	margin-bottom: 20px;
+}
+
+h1 {
+	color: #2c3e50;
+	margin-bottom: 20px;
+	font-size: 28px;
+}
+
+.domain {
+	font-weight: bold;
+	color: #3498db;
+	word-break: break-all;
+}
+
+.warning-message {
+	background-color: #fff3cd;
+	border: 1px solid #ffeaa7;
+	border-radius: 4px;
+	padding: 20px;
+	margin: 20px 0;
+	color: #856404;
+}
+
+.continue-button {
+	display: inline-block;
+	background-color: #007cba;
+	color: white;
+	padding: 12px 30px;
+	text-decoration: none;
+	border-radius: 4px;
+	font-weight: bold;
+	margin: 20px 10px;
+	transition: background-color 0.3s;
+}
+
+.continue-button:hover {
+	background-color: #005a87;
+	color: white;
+}
+
+.cancel-button {
+	display: inline-block;
+	background-color: #6c757d;
+	color: white;
+	padding: 12px 30px;
+	text-decoration: none;
+	border-radius: 4px;
+	font-weight: bold;
+	margin: 20px 10px;
+	transition: background-color 0.3s;
+}
+
+.cancel-button:hover {
+	background-color: #545b62;
+	color: white;
+}
+
+.countdown {
+	font-size: 18px;
+	color: #007cba;
+	margin: 20px 0;
+	font-weight: bold;
+}
+
+.site-info {
+	margin-top: 30px;
+	padding-top: 20px;
+	border-top: 1px solid #eee;
+	color: #666;
+	font-size: 14px;
+}
+
+.go-page-container {
+	max-width: 600px;
+	margin: 50px auto;
+	padding: 40px;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	text-align: center;
+}
+
+.go-page-container .warning-icon {
+	font-size: 48px;
+	color: #ff6b35;
+	margin-bottom: 20px;
+}
+
+.go-page-container h1 {
+	color: #2c3e50;
+	margin-bottom: 20px;
+	font-size: 28px;
+}
+
+.go-page-container .domain {
+	font-weight: bold;
+	color: #3498db;
+	word-break: break-all;
+}
+
+.go-page-container .warning-message {
+	background-color: #fff3cd;
+	border: 1px solid #ffeaa7;
+	border-radius: 4px;
+	padding: 20px;
+	margin: 20px 0;
+	color: #856404;
+}
+
+.go-page-container .continue-button {
+	display: inline-block;
+	background-color: #007cba;
+	color: white;
+	padding: 12px 30px;
+	text-decoration: none;
+	border-radius: 4px;
+	font-weight: bold;
+	margin: 20px 10px;
+	transition: background-color 0.3s;
+}
+
+.go-page-container .continue-button:hover {
+	background-color: #005a87;
+	color: white;
+}
+
+.go-page-container .cancel-button {
+	display: inline-block;
+	background-color: #6c757d;
+	color: white;
+	padding: 12px 30px;
+	text-decoration: none;
+	border-radius: 4px;
+	font-weight: bold;
+	margin: 20px 10px;
+	transition: background-color 0.3s;
+}
+
+.go-page-container .cancel-button:hover {
+	background-color: #545b62;
+	color: white;
+}
+
+.go-page-container .countdown {
+	font-size: 18px;
+	color: #007cba;
+	margin: 20px 0;
+	font-weight: bold;
+}
+
+.go-page-container .site-info {
+	margin-top: 30px;
+	padding-top: 20px;
+	border-top: 1px solid #eee;
+	color: #666;
+	font-size: 14px;
+}
