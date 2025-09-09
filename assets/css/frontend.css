@@ -4,6 +4,11 @@
  * @package Exit_Links_Manager
  */
 
+/* Content wrapper - should not affect layout */
+.exit-links-content {
+	display: contents;
+}
+
 .go-page-container {
 	max-width: 600px;
 	margin: 50px auto;

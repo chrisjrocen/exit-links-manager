@@ -36,7 +36,7 @@ class Exit_Links_Manager_Content_Filter {
 	}
 
 	/**
-	 * Enqueue frontend styles.
+	 * Enqueue frontend styles and scripts.
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style(
@@ -45,10 +45,28 @@ class Exit_Links_Manager_Content_Filter {
 			array(),
 			EXIT_LINKS_MANAGER_VERSION
 		);
+
+		wp_enqueue_script(
+			'exit-links-manager-script',
+			EXIT_LINKS_MANAGER_PLUGIN_URL . 'assets/js/frontend.js',
+			array(),
+			EXIT_LINKS_MANAGER_VERSION,
+			true
+		);
+
+		// Localize script with site URL.
+		wp_localize_script(
+			'exit-links-manager-script',
+			'exitLinksManager',
+			array(
+				'siteUrl'    => home_url(),
+				'leavingUrl' => home_url( '/leaving' ),
+			)
+		);
 	}
 
 	/**
-	 * Filter content to wrap external links with redirect wrapper.
+	 * Filter content to add data attributes for JavaScript processing.
 	 *
 	 * @param string $content The content to filter.
 	 * @return string Filtered content.
@@ -58,98 +76,14 @@ class Exit_Links_Manager_Content_Filter {
 			return $content;
 		}
 
-		$current_domain = $this->get_current_domain();
-
-		libxml_use_internal_errors( true );
-		$doc      = new DOMDocument();
-		$encoding = '<?xml encoding="utf-8" ?>';
-		$doc->loadHTML( $encoding . $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-
-		$links = $doc->getElementsByTagName( 'a' );
-
-		foreach ( $links as $link ) {
-			$href = $link->getAttribute( 'href' );
-			if ( ! $this->is_external_url( $href, $current_domain ) ) {
-				continue;
-			}
-			if ( false !== strpos( $href, '/leaving?url=' ) ) {
-				continue;
-			}
-			if ( ! $this->is_http_url( $href ) ) {
-				continue;
-			}
-			$encoded_url  = urlencode( $href );
-			$redirect_url = home_url( '/leaving?url=' . $encoded_url );
-			$link->setAttribute( 'href', esc_url( $redirect_url ) );
+		// Only wrap content that contains links to avoid unnecessary processing.
+		if ( false !== strpos( $content, '<a ' ) ) {
+			$content = '<span class="exit-links-content" data-site-url="' . esc_url( home_url() ) . '">' . $content . '</span>';
 		}
-
-		$html = $doc->saveHTML();
-		// Remove the XML encoding declaration.
-		$content = preg_replace( '/^<\?xml.+?\?>/', '', $html );
 
 		return $content;
 	}
 
-	/**
-	 * Check if a URL is external.
-	 *
-	 * @param string $url The URL to check.
-	 * @param string $current_domain The current domain.
-	 * @return bool True if external, false otherwise.
-	 */
-	private function is_external_url( $url, $current_domain ) {
-		if ( empty( $url ) || '/' === $url[0] || '#' === $url[0] ) {
-			return false;
-		}
-
-		// Skip protocol-relative URLs that are same domain.
-		if ( 0 === strpos( $url, '//' ) ) {
-			$url = 'http:' . $url;
-		}
-
-		$parsed_url = wp_parse_url( $url );
-		if ( ! $parsed_url || ! isset( $parsed_url['host'] ) ) {
-			return false;
-		}
-
-		$url_domain = $parsed_url['host'];
-
-		// Remove www. prefix for consistent comparison.
-		if ( 0 === strpos( $url_domain, 'www.' ) ) {
-			$url_domain = substr( $url_domain, 4 );
-		}
-
-		return $url_domain !== $current_domain;
-	}
-
-	/**
-	 * Check if a URL is an HTTP/HTTPS URL.
-	 *
-	 * @param string $url The URL to check.
-	 * @return bool True if HTTP/HTTPS, false otherwise.
-	 */
-	private function is_http_url( $url ) {
-		$parsed_url = wp_parse_url( $url );
-		return isset( $parsed_url['scheme'] ) && in_array( $parsed_url['scheme'], array( 'http', 'https' ), true );
-	}
-
-	/**
-	 * Get current domain.
-	 *
-	 * @return string Current domain.
-	 */
-	private function get_current_domain() {
-		$home_url    = home_url();
-		$parsed_home = wp_parse_url( $home_url );
-		$domain      = isset( $parsed_home['host'] ) ? $parsed_home['host'] : '';
-
-		// Remove www. prefix for consistent comparison.
-		if ( 0 === strpos( $domain, 'www.' ) ) {
-			$domain = substr( $domain, 4 );
-		}
-
-		return $domain;
-	}
 
 	/**
 	 * Maybe flush rewrite rules if needed.
