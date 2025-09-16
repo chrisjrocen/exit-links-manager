@@ -11,7 +11,7 @@
  * Text Domain: exit-links-manager
  * Requires at least: 4.7
  * Tested up to: 6.8.2
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Tags: redirects, external links, warnings, link management
  *
  * @package Exit_Links_Manager
