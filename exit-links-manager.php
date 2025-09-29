@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Exit Links Manager
- * Plugin URI: https://wp-fundi.com/exit-links-manager
+ * Plugin URI: https://github.com/chrisjrocen/exit-links-manager
  * Description: Plugins to handle external link redirects. Warn users when they are leaving your site.
  * Version: 1.0.0
  * Author: Chris Ocen
