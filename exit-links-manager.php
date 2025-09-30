@@ -11,7 +11,7 @@
  * Text Domain: exit-links-manager
  * Requires at least: 4.7
  * Tested up to: 6.8.2
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Tags: redirects, external links, warnings, link management
  *
  * @package Exit_Links_Manager
@@ -86,7 +86,11 @@ class Exit_Links_Manager {
 
 		add_rewrite_rule( '^leaving/?$', 'index.php?leaving_page=1', 'top' );
 
-		flush_rewrite_rules();
+		// Force flush rewrite rules.
+		flush_rewrite_rules( true );
+
+		// Set a transient to ensure rewrite rules are flushed on next page load.
+		set_transient( 'exit_links_manager_flush_rewrite_rules', true, 60 );
 	}
 
 	/**
@@ -125,8 +129,6 @@ class Exit_Links_Manager {
 	 * Plugin deactivation.
 	 */
 	public function deactivate() {
-		wp_clear_scheduled_hook( 'Exit_Links_Manager_cleanup' );
-
 		flush_rewrite_rules();
 	}
 }

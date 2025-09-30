@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$encoded_url  = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRING );
+$encoded_url  = filter_input( INPUT_GET, 'url', FILTER_SANITIZE_URL );
 $encoded_url  = $encoded_url ? sanitize_text_field( wp_unslash( $encoded_url ) ) : '';
 $external_url = urldecode( $encoded_url );
 
