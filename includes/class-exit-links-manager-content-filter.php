@@ -25,9 +25,6 @@ class Exit_Links_Manager_Content_Filter {
 	 * Initialize hooks.
 	 */
 	private function init_hooks() {
-		add_filter( 'the_content', array( $this, 'filter_external_links' ), 20 );
-		add_filter( 'the_excerpt', array( $this, 'filter_external_links' ), 20 );
-		add_filter( 'widget_text', array( $this, 'filter_external_links' ), 20 );
 		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_leaving_page' ) );
@@ -63,25 +60,6 @@ class Exit_Links_Manager_Content_Filter {
 				'leavingUrl' => home_url( '/leaving' ),
 			)
 		);
-	}
-
-	/**
-	 * Filter content to add data attributes for JavaScript processing.
-	 *
-	 * @param string $content The content to filter.
-	 * @return string Filtered content.
-	 */
-	public function filter_external_links( $content ) {
-		if ( is_admin() || empty( $content ) ) {
-			return $content;
-		}
-
-		// Only wrap content that contains links to avoid unnecessary processing.
-		if ( false !== strpos( $content, '<a ' ) ) {
-			$content = '<span class="exit-links-content" data-site-url="' . esc_url( home_url() ) . '">' . $content . '</span>';
-		}
-
-		return $content;
 	}
 
 
