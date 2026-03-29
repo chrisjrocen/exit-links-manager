@@ -126,7 +126,7 @@ class Exit_Links_Manager
 		$page_id = wp_insert_post($page_data);
 
 		if (is_wp_error($page_id)) {
-			do_action('qm/debug', 'Exit Links Manager: Failed to create leaving page - ' . $page_id->get_error_message());
+			error_log('Exit Links Manager: Failed to create leaving page - ' . $page_id->get_error_message());
 			return false;
 		}
 

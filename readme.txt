@@ -4,8 +4,8 @@ Contributors:      ocenchris
 Donate link:       https://buymeacoffee.com/ocenchris
 Tags:              redirects, external links, warnings, link management
 Requires at least: 4.7
-Tested up to:      6.8
-Stable tag:        1.0.0
+Tested up to:      6.8.2
+Stable tag:        1.1.0
 Requires PHP:      7.2
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -29,7 +29,7 @@ Easily manage links to external websites. This lightweight plugin create an inte
 
 = 1.1.0 =
 
-* Bug fix: Infinite redirect to leaving page
+* Bug fix: Disabled Infinite redirect to leaving page
 
 = 1.0.0 =
 * Initial release: Basic external link detection and redirect functionality
