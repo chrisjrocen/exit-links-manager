@@ -27,5 +27,9 @@ Easily manage links to external websites. This lightweight plugin create an inte
 
 == Changelog ==
 
+= 1.1.0 =
+
+* Bug fix: Infinite redirect to leaving page
+
 = 1.0.0 =
 * Initial release: Basic external link detection and redirect functionality

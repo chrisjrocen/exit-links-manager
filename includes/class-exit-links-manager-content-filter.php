@@ -43,6 +43,12 @@ class Exit_Links_Manager_Content_Filter {
 			EXIT_LINKS_MANAGER_VERSION
 		);
 
+		// Do not enqueue the link-interception script on the leaving page itself;
+		// doing so causes the "Continue" button to trigger another redirect loop.
+		if ( get_query_var( 'leaving_page' ) ) {
+			return;
+		}
+
 		wp_enqueue_script(
 			'exit-links-manager-script',
 			EXIT_LINKS_MANAGER_PLUGIN_URL . 'assets/js/frontend.js',

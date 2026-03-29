@@ -35,7 +35,7 @@ get_header();
 	</div>
 
 	<div>
-		<a href="<?php echo esc_url( $external_url ); ?>" class="continue-button" id="continue-btn">
+		<a href="<?php echo esc_url( $external_url ); ?>" class="continue-button" id="continue-btn" data-exit-links-processed="true">
 			<?php esc_html_e( 'Continue to External Site', 'exit-links-manager' ); ?>
 		</a>
 		<a onclick="window.close()" class="cancel-button">
